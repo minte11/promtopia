@@ -35,7 +35,17 @@ const Feed = () => {
 	}
 
 	return (
-		<PromptCardList data={prompts} handleTagClick={handleTagClick} />
+		<section className='feed'>
+			<form className='relative w-full flex-center'>
+				<input
+					type='text'
+					placeholder='Search for a tag or a username'
+					required
+					className='search_input peer'
+				/>
+			</form>
+			<PromptCardList data={prompts} handleTagClick={handleTagClick} />
+		</section>
 	)
 };
 
