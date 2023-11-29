@@ -5,19 +5,21 @@ import Image from "next/image";
 import { useState, useEffect } from "react";
 import {signIn, signOut, useSession, getProviders } from "next-auth/react";
 
+const fetchProviders = async () => {
+	return await getProviders();
+}
 
 const Nav = () => {
 	const [providers, setProviders] = useState(null);
-	const isUserLoggedIn = true;
+	const { data: session } = useSession();
+	const { user } = session || {};
 	const [toggleDropdown, setToggleDropdown] = useState(false);
 
-	useEffect(()=> {
-		const setProviders = async () => {
-			// const response = await getProviders();
-			// setProviders(response);
-		}
 
-		setProviders();
+
+	useEffect(()=> {
+		fetchProviders().then(setProviders)
+
 	}, [])
 
 	const providerValues = providers && Object.values(providers);
@@ -37,13 +39,13 @@ const Nav = () => {
 
 			{/*Desktop Navigation*/}
 			<div className="sm:flex hidden">
-				{isUserLoggedIn ? (
+				{user ? (
 					<div className="flex gap-3 md:gap-5">
 						<Link href="/create-prompt" className="black_btn">Create Post</Link>
 						<button type="button" className="outline_btn" onClick={signOut}>Sign Out</button>
 						<Link href="/profile">
 							<Image
-								src="/assets/images/logo.svg"
+								src={user?.image}
 								alt="Edit profile"
 								width={37}
 								height={37}
@@ -71,10 +73,10 @@ const Nav = () => {
 
 			{/* Mobile Navigation */}
 			<div className='sm:hidden flex relative'>
-				{isUserLoggedIn ? (
+				{user ? (
 					<div className='flex'>
 						<Image
-							src="/assets/images/logo.svg"
+							src={user?.image}
 							width={37}
 							height={37}
 							className='rounded-full'
