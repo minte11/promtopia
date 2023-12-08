@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import PromptCard from "@components/PromptCard";
 
 const fetchPrompts = async () => {
@@ -23,16 +23,41 @@ const PromptCardList = ({ data, handleTagClick }) => {
 
 const Feed = () => {
 	const [prompts, setPrompts] = useState([]);
+	const [filteredPrompts, setFilteredPrompts] = useState([]);
+	const timeOutRef = useRef(null);
+	const [searchInput, setSearchInput] = useState("");
 
-	const handleTagClick = () => {}
+	const filterResults = (inputValue) => {
+		const filteredPrompts = prompts.filter(prompt => {
+			return prompt.creator.username.includes(inputValue)
+			 	|| prompt.prompt.includes(inputValue)
+				|| prompt.tag.includes(inputValue)
+			}
+		)
+		setFilteredPrompts(filteredPrompts);
+	}
+
+	const onSearchChange = (e) => {
+		if(timeOutRef.current) {
+			clearTimeout(timeOutRef.current);
+		}
+		timeOutRef.current = setTimeout(() => {
+			timeOutRef.current = null;
+			filterResults(e.target.value)
+		}, 350)
+		setSearchInput(e.target.value);
+	}
+
+	const handleTagClick = (tag) => {
+		setSearchInput(tag);
+		filterResults(tag);
+	}
 
 	useEffect(() => {
 		fetchPrompts().then(setPrompts);
 	}, [])
 
-	if(!prompts.length) {
-		return null;
-	}
+	const promptsToRender =  searchInput.length > 0 ? filteredPrompts : prompts;
 
 	return (
 		<section className='feed'>
@@ -42,9 +67,11 @@ const Feed = () => {
 					placeholder='Search for a tag or a username'
 					required
 					className='search_input peer'
+					value={searchInput}
+					onChange={onSearchChange}
 				/>
 			</form>
-			<PromptCardList data={prompts} handleTagClick={handleTagClick} />
+			<PromptCardList data={promptsToRender} handleTagClick={handleTagClick} />
 		</section>
 	)
 };

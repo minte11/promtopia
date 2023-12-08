@@ -20,7 +20,23 @@ const MyProfile = () => {
 	const handleEdit = (post) => {
 		router.push(`/update-prompt?id=${post._id}`);
 	}
-	const handleDelete = () => {}
+	const handleDelete = async (post) => {
+		const hasConfirmed = confirm("Are you sure you want to delete this prompt?");
+
+		if(!hasConfirmed) {
+			return;
+		}
+
+		try {
+			const response = await fetch(`/api/prompt/${post._id}`,{
+				method: "DELETE",
+			});
+			await response.json();
+			return await fetchPrompts(userId).then(setPrompts);
+		} catch (e) {
+			console.log(e);
+		}
+	}
 
 	useEffect(() => {
 		if(userId) {

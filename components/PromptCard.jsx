@@ -1,19 +1,24 @@
 import { useState } from "react";
 import Image from "next/image";
 import { useSession } from "next-auth/react";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 
 
 const PromptCard = ({ prompt, handleTagClick, handleEdit, handleDelete }) => {
 	const [copied, setCopied] = useState(false);
 	const { data: session } = useSession();
 	const pathname = usePathname();
+	const router = useRouter();
 	const handleCopy = async () => {
 		await navigator.clipboard.writeText(prompt.prompt);
 		setCopied(true)
 		setTimeout(() =>{
 			setCopied(false);
 		}, 3000)
+	}
+
+	const handleAuthorNameClick = () => {
+		router.push(`/profile/${prompt.creator._id}/?name=${prompt.creator.username}`);
 	}
 
 	const isAllowedToEditAndDelete =  session?.user.id === prompt.creator._id && pathname.startsWith("/profile");
@@ -30,10 +35,11 @@ const PromptCard = ({ prompt, handleTagClick, handleEdit, handleDelete }) => {
 						width={40}
 						height={40}
 						className='rounded-full object-contain'
+						onClick={handleAuthorNameClick}
 					/>
 
 					<div className='flex flex-col'>
-						<h3 className='font-satoshi font-semibold text-gray-900'>
+						<h3 onClick={handleAuthorNameClick} className='font-satoshi font-semibold text-gray-900'>
 							{prompt.creator.username}
 						</h3>
 						<p className='font-inter text-sm text-gray-500'>
